@@ -4,12 +4,15 @@ from flask import render_template, redirect, url_for, flash, session, \
     abort
 from flask_login import  login_user, logout_user, \
     current_user
+from app import User,SingupForm,LoginForm,OtaloginForm,db
+import pyqrcode
 
 
-mod = Blueprint('user',__name__)
+
+mod= Blueprint('user',__name__)
 
 
-@app.route('/singup', methods=['GET', 'POST'])
+@mod.route('/singup', methods=['GET', 'POST'])
 def singup():
     """User registration route."""
     def validate_reg():
@@ -44,7 +47,7 @@ def singup():
     return render_template('singup.html', form=form)
 
 
-@app.route('/twofactor')
+@mod.route('/twofactor')
 def two_factor_setup():
     if 'username' not in session:
         return redirect(url_for('index'))
@@ -57,7 +60,7 @@ def two_factor_setup():
         'Expires': '0'}
 
 
-@app.route('/qrcode')
+@mod.route('/qrcode')
 def qrcode():
     if 'username' not in session:
         abort(404)
@@ -77,7 +80,7 @@ def qrcode():
         'Expires': '0'}
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@mod.route('/login', methods=['GET', 'POST'])
 def login():
     """User login route."""
     def login_verify():
@@ -104,7 +107,7 @@ def login():
         return redirect(url_for('two_factor_token'))
     return render_template('login.html', form=form)
 
-@app.route('/token', methods=[ 'get', 'post'])
+@mod.route('/token', methods=[ 'get', 'post'])
 def two_factor_token( ):
     def delsession():
         del session['username'] ; del session['type']
@@ -128,7 +131,7 @@ def two_factor_token( ):
 
     return render_template('2FA.html', form=form)
 
-@app.route('/logout')
+@mod.route('/logout')
 def logout():
     """User logout route."""
     logout_user()

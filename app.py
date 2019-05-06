@@ -14,9 +14,11 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo,Regexp
 import onetimepass
 import pyqrcode
+from __init__ import apps
 
 # create application instance
-app = Flask(__name__)
+app = apps
+
 app.config.from_object('config')
 
 # initialize extensions
@@ -102,9 +104,7 @@ class OtaloginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+
 
 
 
