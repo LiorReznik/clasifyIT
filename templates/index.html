@@ -4,6 +4,6 @@
     {% if current_user.is_authenticated %}
     <h1>HI, {{ current_user.username }}!</h1>
     {% else %}
-    <p>Please <a href="{{ url_for('singup') }}">SingUp</a> or <a href="{{ url_for('login') }}">Login</a>.</p>
+    <p>Please <a href="{{ url_for('users.singup') }}">SingUp</a> or <a href="{{ url_for('users.login') }}">Login</a>.</p>
     {% endif %}
 {% endblock %}

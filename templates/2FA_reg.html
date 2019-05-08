@@ -5,6 +5,6 @@
     <div class="alert alert-danger" role="alert">.Please ensure you are the only one that scans the QR</div>
 
     <p> Please open the FreeOTP  app in  your smartphone and scan the following QR:</p>
-    <p><img id="qrcode" src="{{ url_for('qrcode') }}"></p>
-    <p> <a href="{{ url_for('login') }}">Login</a> </p>
+    <p><img id="qrcode" src="{{ url_for('users.qrcode') }}"></p>
+    <p> <a href="{{ url_for('users.login') }}">Login</a> </p>
 {% endblock %}
