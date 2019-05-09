@@ -1,11 +1,19 @@
 from flask_login import UserMixin
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import base64
 import onetimepass
 import os
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 db = SQLAlchemy()
+login_manager = LoginManager()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 
 class User(UserMixin, db.Model):
     """User model."""

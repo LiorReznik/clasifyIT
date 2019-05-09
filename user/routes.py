@@ -3,13 +3,13 @@ from flask_login import login_user, logout_user, \
     current_user
 from flask import render_template, redirect, url_for, flash, session, \
     abort
-from models import db, User
-from user.froms import SingupForm, LoginForm, OtaloginForm
+from .froms import SingupForm, LoginForm, OtaloginForm
 from io import BytesIO
+from ..models import User , db
 import pyqrcode
 
-
 users = Blueprint('users', __name__)
+
 
 @users.route('/singup', methods=['GET', 'POST'])
 def singup():
