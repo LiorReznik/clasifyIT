@@ -1,11 +1,10 @@
 from flask_login import UserMixin
-from werkzeug.security import generate_password_hash, check_password_hash
 import base64
 import onetimepass
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-
+from .encrypt import hash
 db = SQLAlchemy()
 login_manager = LoginManager()
 
@@ -23,6 +22,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     second_factor_c = db.Column(db.String(16))
     email = db.Column(db.String(64), unique=True, index=True)
+    hasher = hash.hasher()
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -35,10 +35,10 @@ class User(UserMixin, db.Model):
 
     @password.setter
     def password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password_hash= self.hasher['hash'](password)
 
     def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return self.hasher['check'](self.password_hash, password)
 
     def get_otp_uri(self):
         return 'otpauth://totp/2FA-ClassifyIT:{0}?secret={1}&issuer=2FA-ClassifyIT' \

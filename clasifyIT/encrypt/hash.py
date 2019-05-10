@@ -5,8 +5,7 @@ def hasher():
     """
     hasher have the following functionality:
     hash -> hashing a given string with sha-256
-    check_password_with_salt -> checking if the hashed value of given string+salt is equal to another pre-hashed string
-    check_password_without_salt ->  checking if the hashed value of a given string is equal to another pre-hashed string
+    check -> checking if the hashed value of given string+salt is equal to another pre-hashed string
     :return:
     """
     def hash(string):
@@ -134,10 +133,9 @@ def hasher():
             hash_values['h4'] & mask, hash_values['h5'] & mask,
             hash_values['h6'] & mask, hash_values['h7'] & mask)
 
-    return  {'hash':hash,
-             'check_password_with_salt':lambda hashed_string1,entered_string2,salt:
-             hash(entered_string2+salt) == hashed_string1,
-             'check_password_without_salt':lambda hashed_string1,entered_string2:
+
+    return  {'hash': hash,
+             'check': lambda hashed_string1,entered_string2:
              hash(entered_string2) == hashed_string1
              }
 
