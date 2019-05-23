@@ -1,9 +1,50 @@
 {% extends "base.html" %}
 
 {% block page_content %}
-    {% if current_user.is_authenticated %}
-    <h1>HI, {{ current_user.username }}!</h1>
-    {% else %}
-    <p>Please <a href="{{ url_for('users.singup') }}">SingUp</a> or <a href="{{ url_for('users.login') }}">Login</a>.</p>
-    {% endif %}
+
+
+<div id="index">
+    <v-timeline>
+        <v-timeline-item v-for="timeline in content" :key="timeline.id" color="black lighten-2" large>
+            <template v-slot:opposite>
+                <span> [[timeline.status]] </span>
+            </template>
+            <v-card class="elevation-2 blue lighten-2">
+                <v-card-title class="headline">[[timeline.header]]</v-card-title>
+                <v-card-text>
+                    [[timeline.text]]
+                </v-card-text>
+            </v-card>
+        </v-timeline-item>
+    </v-timeline>
+</div>
+<script>
+    var example = new Vue({
+        el: "#index",
+        delimiters: ["[[", "]]"],
+        data: {
+            content: [{
+                    id:1,
+                    status: "הורד את האפליקציה לאימות ",
+                    text: " הרשם לאתר ",
+                    header:"שלב ראשון"
+                }, {
+                    id:2,
+                    status: "הכנס את הקוד באפליקציה",
+                    text: " התחבר לאתר ",
+                    header:"שלב שני"
+
+                },
+                {
+                    id:3,
+                    status: "והעלה אותה לאתר",
+                    text: "קח תמונה של השומה שלך ",
+                    header:"שלב שלישי"
+
+                },
+         
+            ]
+        }
+    })
+</script>
 {% endblock %}

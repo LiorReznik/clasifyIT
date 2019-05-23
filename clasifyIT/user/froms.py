@@ -7,6 +7,7 @@ class SingupForm(FlaskForm):
     """Registration form."""
     username = StringField('Username', validators=[DataRequired(), Length(min=6, max=64),
                                                    Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+
                'Username must contain only letters, numbers, dots or underscores') ])
     password = PasswordField('Password', validators=[DataRequired(),
                                                      Regexp(
@@ -23,6 +24,8 @@ class SingupForm(FlaskForm):
     password2 = PasswordField('Password2',
                               validators=[DataRequired(), EqualTo('password')])
     email = StringField('Email', validators=[DataRequired()])
+    firstName=StringField('First Name',validators=[DataRequired()])
+    lastName=StringField('Last Name',validators=[DataRequired()])
     submit = SubmitField('Sumbit')
 
 

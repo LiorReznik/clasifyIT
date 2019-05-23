@@ -37,7 +37,7 @@ def singup():
         if len(msg) > 0:
             flash(msg)
             return redirect(url_for('users.singup'))
-        user = User(username=form.username.data, password=form.password.data, email=form.email.data)
+        user = User(username=form.username.data, password=form.password.data, email=form.email.data,firstName=form.firstName.data,lastName=form.lastName.data)
         db.session.add(user)
         db.session.commit()
 
