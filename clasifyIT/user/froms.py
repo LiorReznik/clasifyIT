@@ -1,6 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, EqualTo,Regexp
+from wtforms.validators import DataRequired, Length, EqualTo,Regexp,Email
+from clasifyIT.models import User
+from wtforms.validators import ValidationError
 
 
 class SingupForm(FlaskForm):
@@ -40,3 +42,20 @@ class OtaloginForm(FlaskForm):
     """Second factor authentication login"""
     token = StringField('Token', validators=[DataRequired(), Length(6, 6)])
     submit = SubmitField('Login')
+
+class RequestResetForm(FlaskForm):
+    email = StringField('Email',
+                        validators=[DataRequired()])
+    submit = SubmitField('Request Password Reset')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError('There is no account with that email. You must register first.')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), EqualTo('password')])
+submit = SubmitField('Reset Password')
