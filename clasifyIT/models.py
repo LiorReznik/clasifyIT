@@ -7,7 +7,9 @@ from flask_login import LoginManager
 from .encrypt import hash
 db = SQLAlchemy()
 login_manager = LoginManager()
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
+key='5791628bb0b13ce0c676dfde280ba245'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -48,3 +50,18 @@ class User(UserMixin, db.Model):
 
     def verify_otp(self, token):
         return onetimepass.valid_totp(token, self.second_factor_c)
+
+    def get_reset_token(self, expires_sec=1800):
+        s = Serializer(key, expires_sec)
+        return s.dumps({'user_id': self.id}).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(key)
+        try:
+            user_id = s.loads(token)['user_id']
+        except:
+            return None
+
+
+        return User.query.get(user_id)
