@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint,current_app
 from flask_login import login_user, logout_user, \
     current_user
 from flask import render_template, redirect, url_for, flash, session, \
@@ -9,6 +9,9 @@ from ..models import User , db
 import pyqrcode
 from flask_bcrypt import bcrypt
 from flask_mail import Message,Mail
+import smtplib
+from email.mime.text import MIMEText
+from clasifyIT.config import Config
 
 
 users = Blueprint('users', __name__)
@@ -149,7 +152,7 @@ def send_reset_email(user):
     {url_for('users.reset_token', token=token, _external=True)}
     If you did not make this request then simply ignore this email and no changes will be made.
     '''
-    Mail().send(msg)
+    Mail(current_app).send(msg)
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])
@@ -161,7 +164,7 @@ def reset_request():
         user = User.query.filter_by(email=form.email.data).first()
         send_reset_email(user)
         flash('An email has been sent with instructions to reset your password.', 'info')
-        return redirect(url_for('login'))
+        return redirect(url_for('users.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
 
 
