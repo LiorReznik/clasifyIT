@@ -8,5 +8,5 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
-    MAIL_USERNAME = "uselesscode12@gmail.com"
-    MAIL_PASSWORD = "adelitas1"
+    MAIL_USERNAME = os.environ['EMAIL_USER']
+    MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']

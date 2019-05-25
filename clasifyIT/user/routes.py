@@ -7,15 +7,9 @@ from .froms import SingupForm, LoginForm, OtaloginForm,RequestResetForm,ResetPas
 from io import BytesIO
 from ..models import User , db
 import pyqrcode
-from flask_bcrypt import bcrypt
 from flask_mail import Message,Mail
-import smtplib
-from email.mime.text import MIMEText
-from clasifyIT.config import Config
-
 
 users = Blueprint('users', __name__)
-
 
 
 @users.route('/singup', methods=['GET', 'POST'])
@@ -125,6 +119,10 @@ def two_factor_token( ):
         flash('Login was successful')
         delsession()
 
+    def password_change():
+        flash('Your password has been updated! You are now able to log in', 'success')
+        delsession()
+
     form = OtaloginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=session['username']).first()
@@ -134,6 +132,12 @@ def two_factor_token( ):
                 return redirect(url_for('users.two_factor_token'))
             login()
             return redirect(url_for('home.index'))
+        if session['type']  == 'password':
+            if not user.verify_otp(form.token.data):
+                flash('Token is wrong!')
+                return redirect(url_for('users.two_factor_token'))
+            password_change()
+            return redirect(url_for('users.login'))
 
     return render_template('2FA.html', form=form)
 
@@ -178,9 +182,9 @@ def reset_token(token):
         return redirect(url_for('reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user.password = hashed_password
+        user.password = form.password.data
         db.session.commit()
-        flash('Your password has been updated! You are now able to log in', 'success')
-        return redirect(url_for('login'))
+        session['username'] = user.username;
+        session['type'] = 'password'
+        return redirect(url_for('users.two_factor_token'))
     return render_template('reset_token.html', title='Reset Password', form=form)
