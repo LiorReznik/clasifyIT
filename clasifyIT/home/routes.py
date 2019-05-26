@@ -10,7 +10,7 @@ import base64
 
 home = Blueprint('home', __name__)
 
-model = load_model(os.path.join(os.getcwd(), "FINAL.h5"))
+model = load_model(os.path.join(os.getcwd(), "clasifyIT/FINAL.h5"))
 
 model._make_predict_function()
 
