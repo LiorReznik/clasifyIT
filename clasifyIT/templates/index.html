@@ -32,8 +32,8 @@
         }
         console.log(message);
         $.post("http://127.0.0.1:5000/predict",JSON.stringify(message),function(response){
-            $("#cancer_type-predction").text(response.prediction.result.toFixed(6));
-            console.log(response);
+            $("#cancer_type-predction").text(response.prediction.result);
+            var send_result = Response;
         });
     });
 </script>
