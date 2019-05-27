@@ -1,0 +1,4 @@
+.vscode/
+migrations/
+.idea/
+__pycache__/
