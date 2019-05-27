@@ -41,6 +41,7 @@ class LoginForm(FlaskForm):
 class OtaloginForm(FlaskForm):
     """Second factor authentication login"""
     token = StringField('Token', validators=[DataRequired(), Length(6, 6)])
+    code = StringField('code', validators=[DataRequired(), Length(64, 64)])
     submit = SubmitField('Login')
 
 class RequestResetForm(FlaskForm):

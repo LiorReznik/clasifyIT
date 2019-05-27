@@ -4,11 +4,11 @@ import onetimepass
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from .encrypt import hash
+from .encrypt import hash, HMAC
 db = SQLAlchemy()
 login_manager = LoginManager()
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-
+import base64
 key='5791628bb0b13ce0c676dfde280ba245'
 
 @login_manager.user_loader
@@ -27,12 +27,16 @@ class User(UserMixin, db.Model):
     second_factor_c = db.Column(db.String(16))
     email = db.Column(db.String(64), unique=True, index=True)
     hasher = hash.hasher()
+    salt = db.Column(db.String(8), unique=True)
+
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if not self.second_factor_c:
             # generate a random secret
             self.second_factor_c = base64.b32encode(os.urandom(10)).decode('utf-8')
+        if not self.salt:
+            self.salt = base64.b32encode(os.urandom(4)).decode('utf-8')
 
     @property
     def password(self):pass
@@ -51,6 +55,13 @@ class User(UserMixin, db.Model):
     def verify_otp(self, token):
         return onetimepass.valid_totp(token, self.second_factor_c)
 
+    def make_hmac(self):
+        return HMAC.hmac(self.salt, str(self.id))#sending the salt and id of user to ths hmac maker
+
+    def verify_code(self, code):
+        return HMAC.check_authentication(self.salt, str(self.id), code) #veifing the auth code for  verification
+
+
     def get_reset_token(self, expires_sec=1800):
         s = Serializer(key, expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
@@ -62,6 +73,4 @@ class User(UserMixin, db.Model):
             user_id = s.loads(token)['user_id']
         except:
             return None
-
-
         return User.query.get(user_id)

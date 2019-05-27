@@ -8,7 +8,7 @@ from io import BytesIO
 from ..models import User , db
 import pyqrcode
 from flask_mail import Message,Mail
-
+from ..email import sender
 users = Blueprint('users', __name__)
 
 
@@ -27,7 +27,6 @@ def singup():
         if email:
             msg += 'Email already exists.\n'
 
-
     if current_user.is_authenticated:
         return redirect(url_for('home.index'))
 
@@ -38,10 +37,12 @@ def singup():
         if len(msg) > 0:
             flash(msg)
             return redirect(url_for('users.singup'))
-        user = User(username=form.username.data, password=form.password.data, email=form.email.data,firstName=form.firstName.data,lastName=form.lastName.data)
+        email = form.email.data
+        user = User(username=form.username.data, password=form.password.data, email=email,firstName=form.firstName.data,lastName=form.lastName.data)
         db.session.add(user)
         db.session.commit()
-
+        #send code to mail
+        sender.SendMail().preapare_attatched_mail(email,"Auth code","Your auth code is in the attachment",user.make_hmac())
         session['username'] = user.username
         return redirect(url_for('users.two_factor_setup'))
     return render_template('singup.html', form=form)
@@ -112,8 +113,6 @@ def two_factor_token( ):
     def delsession():
         del session['username'] ; del session['type']
 
-
-
     def login():
         login_user(user)
         flash('Login was successful')
@@ -127,8 +126,8 @@ def two_factor_token( ):
     if form.validate_on_submit():
         user = User.query.filter_by(username=session['username']).first()
         if session['type']  == 'login':
-            if not user.verify_otp(form.token.data):
-                flash('Token is wrong!')
+            if not user.verify_otp(form.token.data) or not user.verify_code(form.code.data): #check verificatio mail and  token
+                flash('Token or auth code is Wrong!')
                 return redirect(url_for('users.two_factor_token'))
             login()
             return redirect(url_for('home.index'))

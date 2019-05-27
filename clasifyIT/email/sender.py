@@ -1,8 +1,11 @@
-import smtplib, ssl
+import smtplib, ssl , os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 class SendMail:
+   """""
+   mail sender
+   """""
    def __init__(self):
        self.username = 'clasifyit2@gmail.com'
        self.password = 'E^Utad3c9+Ny,CV-'
@@ -15,10 +18,19 @@ class SendMail:
         html = """\
       <html>
         <body>
-          <p>Hi!,<br>
-            How are you today?<br>
+          <h1>Hi!,<br>
+            How are you today?<h1>
             <p> {}<p>
-          <p> Have a poor and dark day, ClassifyIT!<p>
+          <table width="351" cellspacing="0" cellpadding="0" border="0"> 
+          <tr> <td style="vertical-align: top; text-align:left;color:#000000;font-size:12px;font-family:helvetica, arial;; text-align:left">
+           <span><span style="margin-right:5px;color:#000000;font-size:15px;font-family:helvetica, arial">Classify IT! ,
+            Have a poor ,dark and
+            crappy day</span> </span> <br><br> 
+            <table cellpadding="0" cellpadding="0" border="0"><tr></tr>
+            </table> </td> </tr> </table> 
+            <table width="351" cellspacing="0" cellpadding="0" border="0" style="margin-top:10px"> <tr>
+             <td style="text-align:left;color:#aaaaaa;font-size:10px;font-family:helvetica, arial">
+          <p>Do not use our services even not as a joke</p></td> </tr> </table>
         </body>
       </html>
       """.format(mesg)
@@ -44,10 +56,4 @@ class SendMail:
 
 
 
-sender= SendMail()
-#sender.prepare_base_email(toaddrs  = 'liorrezn@gmail.com', sub = "We are all fucked up", mesg = "lucifer save are souls!")
-sender.preapare_attatched_mail(toaddrs  = 'liorrezn@gmail.com', sub = "We are all fucked up", mesg = "lucifer save are souls!",text="oh my")
-
-#os.environ.get('EMAIL_USER')
-#os.environ.get('EMAIL_PASSWORD')
 

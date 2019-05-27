@@ -2,7 +2,6 @@ from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap
 from flask import Flask
 from .config import Config
-from flask_mail import Mail
 from .user.routes import users
 from .home.routes import home
 from .models import  db , login_manager
