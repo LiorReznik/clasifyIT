@@ -122,7 +122,7 @@ def two_factor_token():
         delsession()
 
     def password_change():
-        user.password = session['type']
+        user.password = session['type'].decode()
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         delsession()
@@ -183,7 +183,7 @@ def reset_token(token):
     form = ResetPasswordForm()
     if form.validate_on_submit():
         session['username'] = user.username
-        session['type'] = form.password.data
+        session['type'] = form.password.data.encode()
         sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
         return redirect(url_for('users.two_factor_token'))
     return render_template('reset_token.html', title='Reset Password', form=form)
