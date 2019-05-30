@@ -1,4 +1,4 @@
-from flask import Blueprint,current_app
+from flask import Blueprint
 from flask_login import login_user, logout_user, \
     current_user
 from flask import render_template, redirect, url_for, flash, session, \
@@ -9,6 +9,9 @@ from ..models import User , db
 import pyqrcode
 from flask_mail import Message,Mail
 from ..email import sender
+from email.mime.text import MIMEText
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 users = Blueprint('users', __name__)
 
 
@@ -109,7 +112,7 @@ def login():
     return render_template('login.html', form=form)
 
 @users.route('/token', methods=[ 'get', 'post'])
-def two_factor_token( ):
+def two_factor_token():
     def delsession():
         del session['username'] ; del session['type']
 
@@ -119,6 +122,8 @@ def two_factor_token( ):
         delsession()
 
     def password_change():
+        user.password = session['type']
+        db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         delsession()
 
@@ -131,8 +136,8 @@ def two_factor_token( ):
                 return redirect(url_for('users.two_factor_token'))
             login()
             return redirect(url_for('home.index'))
-        if session['type']  == 'password':
-            if not user.verify_otp(form.token.data):
+        else:
+            if not user.verify_otp(form.token.data) or not user.verify_code(form.code.data):
                 flash('Token is wrong!')
                 return redirect(url_for('users.two_factor_token'))
             password_change()
@@ -148,20 +153,17 @@ def logout():
 
 def send_reset_email(user):
     token = user.get_reset_token()
-    msg = Message('Password Reset Request',
-                  sender='noreply@demo.com',
-                  recipients=[user.email])
-    msg.body = f'''To reset your password, visit the following link:
-    {url_for('users.reset_token', token=token, _external=True)}
-    If you did not make this request then simply ignore this email and no changes will be made.
-    '''
-    Mail(current_app).send(msg)
+    link = url_for('users.reset_token', token=token, _external=True)
+    body = 'To reset your password, visit the following link: {} If you did not make this request then simply ignore this email and no changes will be made.'.format(
+        link)
+
+    msg = MIMEText(body, 'html')
+    mail = sender.SendMail()
+    mail.prepare_base_email(user.email, 'Password Reset Request', msg)
 
 
 @users.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -173,17 +175,15 @@ def reset_request():
 
 @users.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
+    #user=user = User.query.filter_by(salt=token).first()
     user = User.verify_reset_token(token)
     if user is None:
         flash('That is an invalid or expired token', 'warning')
-        return redirect(url_for('reset_request'))
+        return redirect(url_for('users.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        user.password = form.password.data
-        db.session.commit()
-        session['username'] = user.username;
-        session['type'] = 'password'
+        session['username'] = user.username
+        session['type'] = form.password.data
+        sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
         return redirect(url_for('users.two_factor_token'))
     return render_template('reset_token.html', title='Reset Password', form=form)

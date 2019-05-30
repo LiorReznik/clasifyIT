@@ -5,11 +5,13 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from .encrypt import hash, HMAC
-db = SQLAlchemy()
-login_manager = LoginManager()
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import base64
-key='5791628bb0b13ce0c676dfde280ba245'
+from clasifyIT import config
+
+
+db = SQLAlchemy()
+login_manager = LoginManager()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -63,12 +65,14 @@ class User(UserMixin, db.Model):
 
 
     def get_reset_token(self, expires_sec=1800):
-        s = Serializer(key, expires_sec)
+        s = Serializer(config.Config.SECRET_KEY, expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
+
 
     @staticmethod
     def verify_reset_token(token):
-        s = Serializer(key)
+        #user = User.query.filter_by(salt=token).first()
+        s = Serializer(config.Config.SECRET_KEY)
         try:
             user_id = s.loads(token)['user_id']
         except:
