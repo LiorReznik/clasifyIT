@@ -106,7 +106,7 @@ def login():
         if len(msg) > 0:
             flash(msg)
             return redirect(url_for('users.login'))
-
+        sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
         session['username'] = user.username ; session['type'] = 'login'
         return redirect(url_for('users.two_factor_token'))
     return render_template('login.html', form=form)
