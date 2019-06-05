@@ -254,5 +254,6 @@ def reset_token(token):
         session['username'] = user.username
         session['type'] = form.password.data.encode()
         sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
+
         return redirect(url_for('users.two_factor_token'))
     return render_template('reset_token.html', title='Reset Password', form=form)

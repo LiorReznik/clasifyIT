@@ -8,7 +8,8 @@ from .encrypt import hash, HMAC
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 import base64
 from clasifyIT import config
-
+from flask import session
+from secrets import token_bytes
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -65,14 +66,16 @@ class User(UserMixin, db.Model):
 
 
     def get_reset_token(self, expires_sec=1800):
-        s = Serializer(config.Config.SECRET_KEY, expires_sec)
+        self.create_token()
+        s = Serializer(session['key'], expires_sec)
         return s.dumps({'user_id': self.id}).decode('utf-8')
 
+    def create_token(self):
+        session['key'] = token_bytes()
 
     @staticmethod
     def verify_reset_token(token):
-        #user = User.query.filter_by(salt=token).first()
-        s = Serializer(config.Config.SECRET_KEY)
+        s = Serializer(session['key'])
         try:
             user_id = s.loads(token)['user_id']
         except:
