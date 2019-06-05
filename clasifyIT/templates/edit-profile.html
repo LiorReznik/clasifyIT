@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block page_content %}
+<div id="edit-profile">
+
+
+    <p></p>
+    <v-card>
+        <v-card-title>
+            <h1>Edit Profile</h1>
+        </v-card-title>
+        {{ wtf.quick_form(form) }}
+    </v-card>
+    <br>
+</div>
+<script>
+    var example = new Vue({
+        el: "#edit-profile",
+        delimiters: ["[[", "]]"],
+        data: {
+            message: "Hello Vue!"
+        }
+    })
+</script>
+{% endblock %}

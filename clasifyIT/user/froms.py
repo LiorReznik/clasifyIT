@@ -66,3 +66,23 @@ class ResetPasswordForm(FlaskForm):
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Reset Password')
+
+
+class ChangeUsername(FlaskForm):
+    username = StringField('username', validators=[DataRequired()])
+    confirm_username = StringField('Confirm Username',
+                                        validators=[DataRequired(), EqualTo('username')])
+                                            
+
+    submit = SubmitField('Change user')
+
+class ChangeName(FlaskForm):
+    firstName=StringField('First Name',validators=[DataRequired()])
+    lastName=StringField('Last Name',validators=[DataRequired()])
+    submit = SubmitField('Change name')
+
+class ChangeEmail(FlaskForm):
+    email = StringField('Email',
+                        validators=[DataRequired()])    
+                                            
+    submit = SubmitField('Change email')

@@ -18,10 +18,6 @@ model._make_predict_function()
 def index():
     return render_template('index.html')
 
-@home.route('/profile')
-def profile():
-    message="Hi There"
-    return render_template('profile.html', message=message)
 
 @home.route("/predict", methods=["POST"])
 def predict():

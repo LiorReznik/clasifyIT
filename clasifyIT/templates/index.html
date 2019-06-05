@@ -3,42 +3,81 @@
 {% block page_content %}
 
 {% if current_user.is_authenticated %}
-<body>
-<div>
-    <input id="image-selector" type="file">
-    <button id="predict-button">Predict</button>
-    <p style="font-weight: bold">Prediction</p>
-    <p>cancer type: <span id="cancer_type-predction"></span></p>
-    <img id="selected-image" src=""/>
-</div>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script>
-    let base64Image;
-    $("#image-selector").change(function(){
-        let reader = new FileReader();
-        reader.onload = function(e){
-            let dataURL = reader.result;
-            $('#selectd-image').attr("src",dataURL);
-            base64Image = dataURL.replace("data:image/jpeg;base64,","");
-            console.log(base64Image);
-        }
-        reader.readAsDataURL($("#image-selector")[0].files[0]);
-        $("#cancer_type-predction").text("");
-    });
 
-    $("#predict-button").click(function(event){
-        let message = {
-            image: base64Image
-        }
-        console.log(message);
-        $.post("http://127.0.0.1:5000/predict",JSON.stringify(message),function(response){
-            $("#cancer_type-predction").text(response.prediction.result);
-            var send_result = Response;
+<body>
+    <div id="index">
+        <div>
+            <v-card>
+                <image-uploader @input="setImage"></image-uploader>
+
+                <v-input id="image-selector" type="file"></v-input>
+                <v-btn id="predict-button" @click=uploadImg>Predict</v-btn>
+                <p style="font-weight: bold">Prediction</p>
+                <p>cancer type: <span id="cancer_type-predction"></span></p>
+                <img id="selected-image" src="" />
+            </v-card>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        let base64Image;
+        $("#image-selector").change(function () {
+
+            let reader = new FileReader();
+            let isValid = /\.jpe?g$/i.test(reader.result);
+            if (!isValid) {
+                alert('Only jpg files allowed!');
+            } else {
+                reader.onload = function (e) {
+                    let dataURL = reader.result;
+                    $('#selectd-image').attr("src", dataURL);
+                    base64Image = dataURL.replace("data:image/jpeg;base64,", "");
+                    console.log(base64Image);
+                }
+                reader.readAsDataURL($("#image-selector")[0].files[0]);
+                $("#cancer_type-predction").text("");
+            }
         });
-    });
-</script>
+
+        $("#predict-button").click(function (event) {
+            let message = {
+                image: base64Image
+            }
+            console.log(message);
+            $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function (response) {
+                $("#cancer_type-predction").text(response.prediction.result);
+                var send_result = Response;
+            });
+        });
+        var example = new Vue({
+            el: "#index",
+            data() {
+                return {
+                    hasImage: false,
+                    image: ""
+                }
+            },
+
+            methods: {
+                setImage: function (file) {
+                    this.hasImage = true
+                    this.image = file
+                },
+                uploadImg: function () {
+                    let message = {
+                        image: this.image
+                    }
+                    axios.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function (
+                        response) {
+                        $("#cancer_type-predction").text(response.prediction.result);
+                        var send_result = Response;
+                    })
+                }
+            }
+        })
+    </script>
 </body>
-    
+
 
 {% else %}
 <div id="index">
@@ -62,25 +101,25 @@
         delimiters: ["[[", "]]"],
         data: {
             content: [{
-                    id:1,
+                    id: 1,
                     status: "הורד את האפליקציה לאימות ",
                     text: " הרשם לאתר ",
-                    header:"שלב ראשון"
+                    header: "שלב ראשון"
                 }, {
-                    id:2,
+                    id: 2,
                     status: "הכנס את הקוד באפליקציה",
                     text: " התחבר לאתר ",
-                    header:"שלב שני"
+                    header: "שלב שני"
 
                 },
                 {
-                    id:3,
+                    id: 3,
                     status: "והעלה אותה לאתר",
                     text: "קח תמונה של השומה שלך ",
-                    header:"שלב שלישי"
+                    header: "שלב שלישי"
 
                 },
-         
+
             ]
         }
     })
