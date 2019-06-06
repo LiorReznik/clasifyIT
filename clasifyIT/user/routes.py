@@ -11,10 +11,23 @@ from flask_mail import Message,Mail
 from ..email import sender
 from email.mime.text import MIMEText
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from ..encrypt import des_ofb,hash
 
 users = Blueprint('users', __name__)
 
+def check_for_email(email):
+    users=User.query.all()
+    for user in users:
+        temp=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        if temp==email:
+            return True
+    return False
 
+def decrypt_data(user):
+    user.email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+    user.firstName=des_ofb.ofb_decrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
+    user.lastName=des_ofb.ofb_decrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
+    return user
 
 @users.route('/profile')
 def profile():
@@ -48,9 +61,12 @@ def singup():
             return redirect(url_for('users.singup'))
         email = form.email.data
         user = User(username=form.username.data, password=form.password.data, email=email,firstName=form.firstName.data,lastName=form.lastName.data)
+        user.email=des_ofb.ofb_encrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        user.firstName=des_ofb.ofb_encrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
+        user.lastName=des_ofb.ofb_encrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
+        #send code to mail
         db.session.add(user)
         db.session.commit()
-        #send code to mail
         sender.SendMail().preapare_attatched_mail(email,"Auth code","Your auth code is in the attachment",user.make_hmac())
         session['username'] = user.username
         return redirect(url_for('users.two_factor_setup'))
@@ -102,10 +118,9 @@ def editEmail():
         validate that the username or email does not in the database 
         """""
         nonlocal msg
-        email = User.query.filter_by(email=form.email.data).first()
+        email = check_for_email(form.email.data)
         if email:
             msg += 'Email already exists.\n'
-
 
     form = ChangeEmail()
     if form.validate_on_submit():
@@ -175,7 +190,6 @@ def login():
         if len(msg) > 0:
             flash(msg)
             return redirect(url_for('users.login'))
-        sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
         session['username'] = user.username ; session['type'] = 'login'
         return redirect(url_for('users.two_factor_token'))
     return render_template('login.html', form=form)
@@ -230,12 +244,12 @@ def send_reset_email(user):
     mail = sender.SendMail()
     mail.prepare_base_email(user.email, 'Password Reset Request', msg)
 
-
 @users.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(username=form.username.data).first()
+        user.email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
         send_reset_email(user)
         flash('An email has been sent with instructions to reset your password.', 'info')
         return redirect(url_for('users.login'))
@@ -253,7 +267,11 @@ def reset_token(token):
     if form.validate_on_submit():
         session['username'] = user.username
         session['type'] = form.password.data.encode()
-        sender.SendMail().preapare_attatched_mail(user.email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
-
+        email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        sender.SendMail().preapare_attatched_mail(email, "Auth code", "Your auth code is in the attachment",user.make_hmac())
+        
         return redirect(url_for('users.two_factor_token'))
     return render_template('reset_token.html', title='Reset Password', form=form)
+
+
+

@@ -32,7 +32,7 @@ class User(UserMixin, db.Model):
     hasher = hash.hasher()
     salt = db.Column(db.String(8), unique=True)
 
-
+    
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if not self.second_factor_c:
@@ -59,9 +59,18 @@ class User(UserMixin, db.Model):
         return onetimepass.valid_totp(token, self.second_factor_c)
 
     def make_hmac(self):
+        import sys
+        print(self.salt,sys.stderr)
+        print("LOSER",sys.stderr)
+        print(str(self.id),sys.stderr)
+        print(HMAC.hmac(self.salt, str(self.id)),sys.stderr)
         return HMAC.hmac(self.salt, str(self.id))#sending the salt and id of user to ths hmac maker
 
     def verify_code(self, code):
+        import sys
+        print(self.salt,sys.stderr)
+        print(str(self.id),sys.stderr)
+        print(HMAC.check_authentication(self.salt, str(self.id), code),sys.stderr)
         return HMAC.check_authentication(self.salt, str(self.id), code) #veifing the auth code for  verification
 
 

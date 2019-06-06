@@ -55,12 +55,11 @@ def ipad_hmac(blocks,ipad,key):
         hashed=sha256((str(hashed)+msg).encode('utf-8')).hexdigest()
     return hashed
 
-
-print(hmac("sometext","key"))
-
 def check_authentication(msg,key,code):
     #checks if the authentication code matches the hmac result given with the user details
-    if hmac(msg,key)==code:
+    h=hmac(msg,key)
+    print(h)
+    if h==code:
         return True
     return False
 
