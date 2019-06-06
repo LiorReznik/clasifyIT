@@ -5,25 +5,69 @@
 {% if current_user.is_authenticated %}
 
 <body>
-    <div>
-        <input id="image-selector" type="file">
-        <button id="predict-button">Predict</button>
-        <p style="font-weight: bold">Prediction</p>
-        <p>cancer type: <span id="cancer_type-predction"></span></p>
-        <img id="selected-image" src="" />
+    <div class="wrapper">
+        <h1>upload your image</h1>
     </div>
+    <footer>
+        <ul>
+
+            <li><a href="https://shmul.com">🌐 SHMUL TEAM</a></li>
+            <li><a href="mailto:shmulik323@gmail.com">📧 shmulik323@gmail.com</a></li>
+        </ul>
+    </footer>
+    <div class="flex-container" id="app">
+
+        <div class=" flex-container well well-lg flex-row">
+            <div>
+                <input id="image-selector" type="file">
+
+            </div>
+            <img id="img" src="" height="200" alt="Image preview...">
+            <button type="button" class="btn btn-default" id="predict-button">Predict</button>
+            <div class="media">
+
+                <div id="img1-div">
+                    <img id="img1" src="" height="200">
+                </div>
+            </div>
+
+
+            <div>
+                <div class=" flex-container well flex-row">
+                    <div class="wrapper">
+                        <p style="font-weight: bold">Prediction</p>
+                        <p>cancer type: <h1 class="blood" id="cancer_type-predction"></h1>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         let base64Image;
         $("#image-selector").change(function () {
             let reader = new FileReader();
+            var file = document.querySelector('input[type=file]').files[0]; //sames as here
+            var preview = document.getElementById('img');
+            //selects the query named img
+
             reader.onload = function (e) {
                 let dataURL = reader.result;
+                preview.src = reader.result
                 $('#selectd-image').attr("src", dataURL);
                 base64Image = dataURL.replace("data:image/jpeg;base64,", "");
                 console.log(base64Image);
             }
-            reader.readAsDataURL($("#image-selector")[0].files[0]);
+            if (file) {
+                reader.readAsDataURL(file); //reads the data as a URL
+            } else {
+                preview.src = "";
+            }
             $("#cancer_type-predction").text("");
         });
 
@@ -35,9 +79,137 @@
             $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function (response) {
                 $("#cancer_type-predction").text(response.prediction.result);
                 var send_result = Response;
+                var preview1 = document.getElementById("img1") //selects the query named img
+                preview1.src = "https://media.giphy.com/media/5q3NyUvgt1w9unrLJ9/source.gif"
             });
         });
     </script>
+    <style>
+        #app {
+            display: flex;
+            flex-direction: column;
+
+        }
+
+        #img-div {
+            justify-content: flex-end
+        }
+
+        .flex-container {
+
+            background: #fff;
+            box-shadow: 0 0 20px rgba(72, 98, 85, 0.6);
+            box-sizing: border-box;
+            padding: 40px;
+        }
+
+        .h1 {
+            background-color: #34495e;
+
+        }
+
+        .media {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end
+        }
+
+        #predict-button {
+            padding: 10px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            background-color: #34495e;
+        }
+
+        @font-face {
+            font-family: 'ubuntu';
+            font-style: italic;
+            font-weight: 300;
+            src: local("Lato Light Italic"), local("Lato-LightItalic"),
+                url(https://fonts.gstatic.com/s/ubuntucondensed/v8/u-4k0rCzjgs5J7oXnJcM_0kACGMtT-Dfqw.woff2) format("woff2");
+        }
+
+
+
+        a {
+            text-decoration: none;
+            color: #9ca0b1;
+        }
+
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background: #2d303a;
+            border-top: 1px solid #dddddd;
+        }
+
+        footer ul {
+            list-style-type: none;
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.2rem 1.5rem;
+            line-height: 40px;
+        }
+
+        footer ul li img.avatar {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-style: solid;
+            border-width: 4px;
+            border-color: #444857;
+            border-radius: 50%;
+            float: left;
+        }
+
+        footer ul li a.fullname {
+            margin-left: 14px;
+        }
+
+        .wrapper {
+            text-align: center;
+        }
+
+        .wrapper h1 {
+            color: #fff;
+            font-size: 92px;
+            font-family: 'ubuntu';
+            text-transform: uppercase;
+            font-weight: 700;
+            font-family: 'Josefin Sans', sans-serif;
+            background: linear-gradient(to right, #697dff 10%, #fff 50%, #5bdaff 60%);
+            background-size: auto auto;
+            background-clip: border-box;
+            background-size: 200% auto;
+            color: #fff;
+            background-clip: text;
+            text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textclip 1.5s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes textclip {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        /* Blue */
+    </style>
 </body>
 
 

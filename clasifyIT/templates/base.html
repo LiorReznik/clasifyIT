@@ -28,7 +28,7 @@
                 <li><a href="{{ url_for('home.index') }}">Home</a></li>
             </ul>
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('home.index') }}">contact us</a></li>
+                <li><a href="{{ url_for('home.contact') }}">contact us</a></li>
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -54,6 +54,7 @@
         {{ message }}
     </div>
     {% endfor %}
+
     {% block script %}
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
@@ -61,6 +62,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     {% endblock %}
-    {% block page_content %}{% endblock %}
+    {% block page_content %}
+    {% endblock %}
 </div>
 {% endblock %}
