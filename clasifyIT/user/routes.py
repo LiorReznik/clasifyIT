@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint,jsonify,request
 from flask_login import login_user, logout_user, \
     current_user
 from flask import render_template, redirect, url_for, flash, session, \
@@ -23,11 +23,14 @@ def check_for_email(email):
             return True
     return False
 
-def decrypt_data(user):
-    user.email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
-    user.firstName=des_ofb.ofb_decrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
-    user.lastName=des_ofb.ofb_decrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
-    return user
+@users.route('/decrypted', methods=['GET'])
+def decrypt_data():
+    data=request.get_json()
+    user=User.query.filter_by(username=data['username'])
+    email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+    firstName=des_ofb.ofb_decrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
+    lastName=des_ofb.ofb_decrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
+    return jsonify({'username': user.username,'email':email,'firstName':firstName,'lastName':lastName})
 
 @users.route('/profile')
 def profile():
