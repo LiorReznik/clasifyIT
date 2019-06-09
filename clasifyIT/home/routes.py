@@ -6,7 +6,9 @@ import numpy as np
 import io 
 import os
 import base64
-
+from flask_login import login_user, logout_user,current_user
+from ..email import sender
+from email.mime.text import MIMEText
 
 home = Blueprint('home', __name__)
 
@@ -44,6 +46,8 @@ def predict():
     }
     
     print(cancer_type[prediction])
+    mail="almoggro12@gmail.com"
+    sender.SendMail().preapare_attatched_mail(mail,"The Result","Open the file to see the result",cancer_type[prediction])
 
     response = {
         'prediction': {
