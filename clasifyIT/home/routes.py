@@ -6,10 +6,10 @@ import numpy as np
 import io 
 import os
 import base64
-from flask_login import login_user, logout_user,current_user
+from flask_login import login_user, logout_user, current_user
 from ..email import sender
 from email.mime.text import MIMEText
-
+from ..encrypt import des_ofb,hash
 home = Blueprint('home', __name__)
 
 model = load_model(os.path.join(os.getcwd(), "clasifyIT/FINAL.h5"))
@@ -46,8 +46,8 @@ def predict():
     }
     
     print(cancer_type[prediction])
-    mail="almoggro12@gmail.com"
-    sender.SendMail().preapare_attatched_mail(mail,"The Result","Open the file to see the result",cancer_type[prediction])
+    email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])
+    sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
 
     response = {
         'prediction': {
