@@ -25,8 +25,7 @@ def check_for_email(email):
 
 @users.route('/decrypted', methods=['GET'])
 def decrypt_data():
-    data=request.get_json()
-    user=User.query.filter_by(username=data['username'])
+    user=current_user
     email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
     firstName=des_ofb.ofb_decrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
     lastName=des_ofb.ofb_decrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])

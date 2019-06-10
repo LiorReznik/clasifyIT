@@ -4,7 +4,7 @@
 
 {% block page_content %}
 <div id="profile">
-    <v-app>
+    <v-app >
         <v-container fluid grid-list-md>
             <v-layout row wrap>
                 <v-flex d-flex xs12 xl4 sm6 md4>
@@ -21,7 +21,7 @@
                                         <v-icon>account_circle</v-icon>
                                     </v-avatar>
                                     <p>
-                                        <h4>Hi:{{current_user.firstName}} {{current_user.lastName}} </h4>
+                                        <h4>Hi:[[name]] [[last]] </h4>
                                     </p>
                                     <v-btn round flat href="/edit_name">
                                         <v-icon>create</v-icon>
@@ -33,7 +33,7 @@
                                         <v-icon>account_circle</v-icon>
                                     </v-avatar>
                                     <p>
-                                        <h4>User-Name:{{current_user.username}}</h4>
+                                        <h4>User-Name:[[username]]</h4>
                                     </p>
                                     <v-btn round flat href="/edit_username">
                                         <v-icon>create</v-icon>
@@ -45,7 +45,7 @@
                                         <v-icon>email</v-icon>
                                     </v-avatar>
                                     <p>
-                                        <h4>Email:{{current_user.email}}</h4>
+                                        <h4>Email:[[email]]</h4>
                                     </p>
                                     <v-btn round flat href="/edit_email">
                                         <v-icon>create</v-icon>
@@ -72,10 +72,37 @@
     var example = new Vue({
         el: "#profile",
         delimiters: ["[[", "]]"],
-        data: {
+        data() {
+            return {
+                username:"sss",
+                email:"",
+                name:"",
+                last:""
+            }
+        },
+        created() {
+               this.getUser()
+           },
+        methods: {
+          async getUser(){
+           await axios.get("http://127.0.0.1:5000/decrypted").then((result) => {
+                this.username=result.data.username
+                this.email=result.data.email
+                this.name=result.data.firstName
+                this.last=result.data.lastName
+          
 
+            }).catch((err) => {
+                console.log(err)
+            });
 
-        }
+           } 
+           ,
+        
+           mounted() {
+               this.getUser()
+           },
+        },
     })
 </script>
 {% endblock %}
