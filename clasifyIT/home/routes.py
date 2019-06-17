@@ -67,17 +67,22 @@ def createPdf():
 
 @home.route("/predict", methods=["POST"])
 def predict():
+    """
+    prediction function that gets an image from the user (frontend upload)
+    and classifies it with a pre-trained model
+    :return:
+    """
     if current_user.is_authenticated:
         message = request.get_json(force=True)
         encoded = message['image']
         decoded = base64.b64decode(encoded)
         image = Image.open(io.BytesIO(decoded))
-        processed_image = prepare_image(image, target_size=(50,50))
+        processed_image = prepare_image(image, target_size=(50,50))#resizeing the image
 
 
-        prediction = np.argmax(model.predict(processed_image).tolist())
+        prediction = np.argmax(model.predict(processed_image).tolist())#getting the prediction
 
-        cancer_type = {
+        cancer_type = { #translation dict
             0 : "Melanocytic_nevi",
             1 : "Melanoma",
             2 : "Benign_keratosis",
@@ -96,6 +101,8 @@ def predict():
             }
         }
 
+        # sending the result to the front
+        response = {'prediction': {'result' : cancer_type[prediction]}}
         return jsonify(response)
     else:
-        return redirect(url_for('user.login'))
+        return redirect(url_for('user.login')) #if not logged in redirecting to login page

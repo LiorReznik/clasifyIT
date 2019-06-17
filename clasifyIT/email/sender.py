@@ -1,7 +1,9 @@
 import smtplib, ssl , os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from ..singelton import singleton
 
+@singleton
 class SendMail:
    """""
    mail sender
@@ -12,6 +14,14 @@ class SendMail:
        self.message = MIMEMultipart()
 
    def prepare_base_email(self,toaddrs,sub,mesg,base = True):
+        """
+        base email (text without attachment) in a form of html
+        :param toaddrs:
+        :param sub:
+        :param mesg:
+        :param base:
+        :return:
+        """
         self. message["From"] = self.username
         self.message["To"] = toaddrs
         self.message["Subject"] = sub
@@ -36,21 +46,32 @@ class SendMail:
       """.format(mesg)
         self.message.attach(MIMEText(html, "html"))
         if base:
-            self.__send
+            self.__send #sending the message
 
    @property
    def __send(self):
+        """
+        method to send the email
+        :return:
+        """
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(self.username, self.password)
-            server.sendmail(self.username, self.message["To"], self.message.as_string())
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:#openning an ssl connection to our gmail account
+            server.login(self.username, self.password)# logging in
+            server.sendmail(self.username, self.message["To"], self.message.as_string()) #sending the message
 
    def  preapare_attatched_mail(self,toaddrs,sub,mesg,text):
-
+        """
+        method to send a message with an txt attachment used for sending th result or the 3-rd auth code
+        :param toaddrs:
+        :param sub:
+        :param mesg:
+        :param text:
+        :return:
+        """
         self.prepare_base_email(toaddrs=toaddrs,sub=sub,mesg=mesg,base =False)
 
         attachment = MIMEText(text)
-        attachment.add_header('Content-Disposition', 'attachment', filename='result.txt')
+        attachment.add_header('Content-Disposition', 'attachment', filename='result.txt')#making the file
         self.message.attach(attachment)
         self.__send
 

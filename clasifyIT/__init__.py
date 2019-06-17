@@ -22,8 +22,8 @@ def create_app(config_class = Config):
     app.register_blueprint(home)
     bootstrap = Bootstrap(app)
     migrate = Migrate(app, db)
-    class AdminModelView(ModelView):
 
+    class AdminModelView(ModelView):
         def is_accessible(self):
             return current_user.admin
             

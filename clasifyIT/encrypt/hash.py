@@ -1,6 +1,10 @@
 """
 self implementation of sha256 hashing function 
 """
+from ..singelton import singleton
+
+
+@singleton
 def hasher():
     """
     hasher have the following functionality:
@@ -133,9 +137,5 @@ def hasher():
             hash_values['h4'] & mask, hash_values['h5'] & mask,
             hash_values['h6'] & mask, hash_values['h7'] & mask)
 
-
-    return  {'hash': hash,
-             'check': lambda hashed_string1,entered_string2:
-             hash(entered_string2) == hashed_string1
-             }
+    return  {'hash': hash,'check': lambda hashed_string1,entered_string2:hash(entered_string2) == hashed_string1}
 
