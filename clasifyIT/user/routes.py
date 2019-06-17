@@ -7,11 +7,10 @@ from .froms import SingupForm, LoginForm, OtaloginForm,RequestResetForm,ResetPas
 from io import BytesIO
 from ..models import User , db
 import pyqrcode
-from flask_mail import Message,Mail
 from ..email import sender
 from email.mime.text import MIMEText
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from ..encrypt import des_ofb,hash
+import base64,os
 
 users = Blueprint('users', __name__)
 
@@ -68,10 +67,15 @@ def singup():
             flash(msg)
             return redirect(url_for('users.singup'))
         email = form.email.data
-        user = User(username=form.username.data, password=form.password.data, email=email,firstName=form.firstName.data,lastName=form.lastName.data)
+        user = User(username=form.username.data, email=email,firstName=form.firstName.data,
+                    lastName=form.lastName.data,salt=base64.b32encode(os.urandom(4)).decode('utf-8'),
+                    second_factor_c = base64.b32encode(os.urandom(10)).decode('utf-8'), password=form.password.data
+                    )
+
         user.email=des_ofb.ofb_encrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
         user.firstName=des_ofb.ofb_encrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
         user.lastName=des_ofb.ofb_encrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
+
         #send code to mail
         db.session.add(user)
         db.session.commit()
@@ -145,7 +149,8 @@ def editEmail():
             if len(msg) > 0:
                 flash(msg)
                 return redirect(url_for('users.editEmail'))
-            current_user.email=des_ofb.ofb_encrypt(form.email.data,current_user.password_hash[:8],current_user.password_hash[24:32])
+            current_user.email=des_ofb.ofb_encrypt(form.email.data,current_user.password_hash[:8],
+                                                   current_user.password_hash[24:32])
             db.session.commit()
             return redirect(url_for('users.profile'))
         return render_template('edit-profile.html', form=form)
@@ -166,6 +171,10 @@ def two_factor_setup():
 
 @users.route('/qrcode')
 def qrcode():
+    """
+    function to generate a qrcode for the use registration
+    :return:
+    """
     if 'username' not in session:
         abort(404)
     user = User.query.filter_by(username=session['username']).first()

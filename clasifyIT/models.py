@@ -33,34 +33,39 @@ class User(UserMixin, db.Model):
     salt = db.Column(db.String(8), unique=True)
     admin=db.Column(db.Boolean(),default=False)
 
-    
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        if not self.second_factor_c:
-            # generate a random secret
-            self.second_factor_c = base64.b32encode(os.urandom(10)).decode('utf-8')
-        if not self.salt:
-            self.salt = base64.b32encode(os.urandom(4)).decode('utf-8')
 
     @property
     def password(self):pass
 
     @password.setter
     def password(self, password):
-        self.password_hash= self.hasher['hash'](password)
+        self.password_hash= self.hasher['hash'](password+self.salt)
 
     def verify_password(self, password):
-        return self.hasher['check'](self.password_hash, password)
+        return self.hasher['check'](self.password_hash, password+self.salt)
 
     def get_otp_uri(self):
-        return 'otpauth://totp/2FA-ClassifyIT:{0}?secret={1}&issuer=2FA-ClassifyIT' \
-            .format(self.username, self.second_factor_c)
+        """
+        making the otp uri for the qr
+        :return:
+        """
+        return 'otpauth://totp/2FA-ClassifyIT:{}?secret={}&issuer=2FA-ClassifyIT'.format(self.username, self.second_factor_c)
 
     def verify_otp(self, token):
+        """
+        verifing the otp entered by user
+        :param token:
+        :return:
+        """
         return onetimepass.valid_totp(token, self.second_factor_c)
 
     def make_hmac(self):
-        
+        """
+        makeing hmac to send to the user
+        :return:
+        """
         return HMAC.hmac(self.salt, str(self.id))#sending the salt and id of user to ths hmac maker
 
     def verify_code(self, code):

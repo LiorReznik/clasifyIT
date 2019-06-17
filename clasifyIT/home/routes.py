@@ -34,17 +34,22 @@ def contact():
 
 @home.route("/predict", methods=["POST"])
 def predict():
+    """
+    prediction function that gets an image from the user (frontend upload)
+    and classifies it with a pre-trained model
+    :return:
+    """
     if current_user.is_authenticated:
         message = request.get_json(force=True)
         encoded = message['image']
         decoded = base64.b64decode(encoded)
         image = Image.open(io.BytesIO(decoded))
-        processed_image = prepare_image(image, target_size=(50,50))
+        processed_image = prepare_image(image, target_size=(50,50))#resizeing the image
 
 
-        prediction = np.argmax(model.predict(processed_image).tolist())
+        prediction = np.argmax(model.predict(processed_image).tolist())#getting the prediction
 
-        cancer_type = {
+        cancer_type = { #translation dict
             0 : "Melanocytic_nevi",
             1 : "Melanoma",
             2 : "Benign_keratosis",
@@ -56,16 +61,13 @@ def predict():
         
         print(cancer_type[prediction])
         email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])
+
         print(email)
         
-        # sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
+        #sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
 
-        response = {
-            'prediction': {
-                'result' : cancer_type[prediction]
-            }
-        }
-
+        # sending the result to the front
+        response = {'prediction': {'result' : cancer_type[prediction]}}
         return jsonify(response)
     else:
-        return redirect(url_for('user.login'))
+        return redirect(url_for('user.login')) #if not logged in redirecting to login page

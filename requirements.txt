@@ -12,6 +12,7 @@ Flask-Mail==0.9.1
 Flask-Migrate==2.5.2
 Flask-SQLAlchemy==2.3.0
 Flask-WTF==0.14.2
+Flask-admin==1.5.3
 gast==0.2.2
 grpcio==1.21.1
 h5py==2.9.0
