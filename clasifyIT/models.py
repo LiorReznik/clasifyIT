@@ -31,6 +31,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     hasher = hash.hasher()
     salt = db.Column(db.String(8), unique=True)
+    admin=db.Column(db.Boolean(),default=False)
 
     
     def __init__(self, **kwargs):

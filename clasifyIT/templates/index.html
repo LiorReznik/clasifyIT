@@ -8,15 +8,9 @@
     <div class="wrapper">
         <h1>upload your image</h1>
     </div>
-    <footer>
-        <ul>
 
-            <li><a href="https://shmul.com">🌐 SHMUL TEAM</a></li>
-            <li><a href="mailto:shmulik323@gmail.com">📧 shmulik323@gmail.com</a></li>
-        </ul>
-    </footer>
     <div class="flex-container" id="app">
-
+    
         <div class=" flex-container well well-lg flex-row">
             <div>
                 <input id="image-selector" type="file">
@@ -25,7 +19,6 @@
             <img id="img" src="" height="200" alt="Image preview...">
             <button type="button" class="btn btn-default" id="predict-button">Predict</button>
             <div class="media">
-
                 <div id="img1-div">
                     <img id="img1" src="" height="200">
                 </div>
@@ -33,7 +26,11 @@
 
 
             <div>
+                    <div id="searchDoctor">
+            <a href="http://127.0.0.1:5000/search-doctor" class="btn btn-default">Find Doctor</a>            
+        </div>
                 <div class=" flex-container well flex-row">
+                    
                     <div class="wrapper">
                         <p style="font-weight: bold">Prediction</p>
                         <p>cancer type: <h1 class="blood" id="cancer_type-predction"></h1>
@@ -70,7 +67,7 @@
             }
             $("#cancer_type-predction").text("");
         });
-
+    
         $("#predict-button").click(function (event) {
             let message = {
                 image: base64Image
@@ -81,7 +78,8 @@
                 var send_result = Response;
                 var preview1 = document.getElementById("img1") //selects the query named img
                 preview1.src = "https://media.giphy.com/media/5q3NyUvgt1w9unrLJ9/source.gif"
-            });
+           
+                });
         });
     </script>
     <style>
@@ -89,6 +87,14 @@
             display: flex;
             flex-direction: column;
 
+        }
+        a.button {
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            appearance: button;
+
+            text-decoration: none;
+            color: initial;
         }
 
         #img-div {
@@ -143,40 +149,6 @@
             color: #9ca0b1;
         }
 
-        footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background: #2d303a;
-            border-top: 1px solid #dddddd;
-        }
-
-        footer ul {
-            list-style-type: none;
-            position: relative;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.2rem 1.5rem;
-            line-height: 40px;
-        }
-
-        footer ul li img.avatar {
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            border-style: solid;
-            border-width: 4px;
-            border-color: #444857;
-            border-radius: 50%;
-            float: left;
-        }
-
-        footer ul li a.fullname {
-            margin-left: 14px;
-        }
 
         .wrapper {
             text-align: center;

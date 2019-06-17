@@ -18,7 +18,15 @@ model._make_predict_function()
 
 @home.route('/')
 def index():
+    
     return render_template('index.html')
+
+
+@home.route('/search-doctor')
+def search():
+    return render_template('search.html')
+
+    
 @home.route('/contact')
 def contact():
     return render_template('contact.html')
@@ -26,33 +34,38 @@ def contact():
 
 @home.route("/predict", methods=["POST"])
 def predict():
-    message = request.get_json(force=True)
-    encoded = message['image']
-    decoded = base64.b64decode(encoded)
-    image = Image.open(io.BytesIO(decoded))
-    processed_image = prepare_image(image, target_size=(50,50))
+    if current_user.is_authenticated:
+        message = request.get_json(force=True)
+        encoded = message['image']
+        decoded = base64.b64decode(encoded)
+        image = Image.open(io.BytesIO(decoded))
+        processed_image = prepare_image(image, target_size=(50,50))
 
 
-    prediction = np.argmax(model.predict(processed_image).tolist())
+        prediction = np.argmax(model.predict(processed_image).tolist())
 
-    cancer_type = {
-        0 : "Melanocytic_nevi",
-        1 : "Melanoma",
-        2 : "Benign_keratosis",
-        3 : "Basal_cell_carcinoma",
-        4 : "Actinic_keratoses",
-        5 : "Vascular_lesions",
-        6 : "Dermatofibroma"
-    }
-    
-    print(cancer_type[prediction])
-    email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])
-    sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
-
-    response = {
-        'prediction': {
-            'result' : cancer_type[prediction]
+        cancer_type = {
+            0 : "Melanocytic_nevi",
+            1 : "Melanoma",
+            2 : "Benign_keratosis",
+            3 : "Basal_cell_carcinoma",
+            4 : "Actinic_keratoses",
+            5 : "Vascular_lesions",
+            6 : "Dermatofibroma"
         }
-    }
+        
+        print(cancer_type[prediction])
+        email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])
+        print(email)
+        
+        # sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
 
-    return jsonify(response)
+        response = {
+            'prediction': {
+                'result' : cancer_type[prediction]
+            }
+        }
+
+        return jsonify(response)
+    else:
+        return redirect(url_for('user.login'))

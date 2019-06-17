@@ -1,0 +1,61 @@
+@import "https://unpkg.com/element-ui/lib/theme-chalk/index.css";
+
+
+
+.el-header {
+    padding: 0px;
+    position:fixed; /* 绝对定位，fixed是相对于浏览器窗口定位。 */
+    top:0; /* 距离窗口顶部距离 */
+    left:0; /* 距离窗口左边的距离 */
+    width:100%; /* 宽度设置为100% */
+    z-index:99; /* 层叠顺序，数值越大就越高。页面滚动的时候就不会被其他内容所遮挡。 */
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+}
+.el-aside {
+    height: 100%;
+    position:fixed; /* 绝对定位，fixed是相对于浏览器窗口定位。 */
+    top:60px; /* 距离窗口顶部距离 */
+    left:0; /* 距离窗口左边的距离 */
+    z-index:98; /* 层叠顺序，数值越大就越高。页面滚动的时候就不会被其他内容所遮挡。 */
+    background-color:#545c64;
+    color: #333;
+    text-align: center;
+    line-height: 200px;
+}
+.el-footer {
+    background-color: #B3C0D1;
+    color: #333;
+    text-align: center;
+    line-height: 60px;
+    position: fixed;
+    bottom: 0px;
+    left: 200px;
+    z-index: 90;
+    width: 100%
+  }
+
+.el-main {
+    margin: 60px 0px 60px 200px;
+    padding: 10px 20px;
+    background-color: #E9EEF3;
+    color: #333;
+  }
+
+  
+  .el-container:nth-child(5) .el-aside,
+  .el-container:nth-child(6) .el-aside {
+    line-height: 260px;
+  }
+  
+  .el-container:nth-child(7) .el-aside {
+    line-height: 320px;
+  }
+  .el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    min-height: 400px;
+  }
+.el-form {
+  max-width: 300px;
+}

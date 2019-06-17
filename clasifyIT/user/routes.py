@@ -33,9 +33,12 @@ def decrypt_data():
 
 @users.route('/profile')
 def profile():
-    message="Hi There"
-    return render_template('profile.html', message=message)
-
+    if current_user.is_authenticated:
+        message="Hi There"
+        return render_template('profile.html', message=message)
+    else:
+        return redirect(url_for('users.login'))
+        
 @users.route('/singup', methods=['GET', 'POST'])
 def singup():
     """User registration route."""
@@ -76,67 +79,75 @@ def singup():
 
 @users.route('/edit_username', methods=['GET', 'POST'])
 def editProfile():
-    """User registration route."""
-    def validate_reg():
-        """""
-        validate that the username or email does not in the database 
-        """""
-        nonlocal msg
-        user = User.query.filter_by(username=form.username.data).first()
-        if user:
-            msg += 'Username already exists.\n'
+    if current_user.is_authenticated:
 
-    form = ChangeUsername()
-    if form.validate_on_submit():
-        msg = ''
-        validate_reg()
-        if len(msg) > 0:
-            flash(msg)
-            return redirect(url_for('users.editProfile'))
+        """User registration route."""
+        def validate_reg():
+            """""
+            validate that the username or email does not in the database 
+            """""
+            nonlocal msg
+            user = User.query.filter_by(username=form.username.data).first()
+            if user:
+                msg += 'Username already exists.\n'
 
-        current_user.username=form.username.data
-        db.session.commit()
-        return redirect(url_for('users.profile'))
+        form = ChangeUsername()
+        if form.validate_on_submit():
+            msg = ''
+            validate_reg()
+            if len(msg) > 0:
+                flash(msg)
+                return redirect(url_for('users.editProfile'))
 
-    return render_template('edit-profile.html', form=form)
+            current_user.username=form.username.data
+            db.session.commit()
+            return redirect(url_for('users.profile'))
+
+        return render_template('edit-profile.html', form=form)
+    else:
+        return redirect(url_for('users.login'))
 
 @users.route('/edit_name', methods=['GET', 'POST'])
 def editName():
-
-
-    form = ChangeName()
-    if form.validate_on_submit():
-        current_user.firstName=form.firstName.data
-        current_user.lastName=form.lastName.data
-        db.session.commit()
-        return redirect(url_for('users.profile'))
-    return render_template('edit-profile.html', form=form)
+    if current_user.is_authenticated:
+        form = ChangeName()
+        if form.validate_on_submit():
+            current_user.firstName=form.firstName.data
+            current_user.lastName=form.lastName.data
+            db.session.commit()
+            return redirect(url_for('users.profile'))
+        return render_template('edit-profile.html', form=form)
+    else:
+        return redirect(url_for('users.login'))
 
 @users.route('/edit_email', methods=['GET', 'POST'])
 def editEmail():
-    """User registration route."""
-    def validate_reg():
-        """""
-        validate that the username or email does not in the database 
-        """""
-        nonlocal msg
-        email = check_for_email(form.email.data)
-        if email:
-            msg += 'Email already exists.\n'
+    if current_user.is_authenticated:
 
-    form = ChangeEmail()
-    if form.validate_on_submit():
-        msg = ''
-        validate_reg()
-        if len(msg) > 0:
-            flash(msg)
-            return redirect(url_for('users.editEmail'))
+        """User registration route."""
+        def validate_reg():
+            """""
+            validate that the username or email does not in the database 
+            """""
+            nonlocal msg
+            email = check_for_email(form.email.data)
+            if email:
+                msg += 'Email already exists.\n'
 
-        current_user.email=form.email.data
-        db.session.commit()
-        return redirect(url_for('users.profile'))
-    return render_template('edit-profile.html', form=form)
+        form = ChangeEmail()
+        if form.validate_on_submit():
+            msg = ''
+            validate_reg()
+            if len(msg) > 0:
+                flash(msg)
+                return redirect(url_for('users.editEmail'))
 
+            current_user.email=form.email.data
+            db.session.commit()
+            return redirect(url_for('users.profile'))
+        return render_template('edit-profile.html', form=form)
+    else:
+        return redirect(url_for('users.login'))
 @users.route('/twofactor')
 def two_factor_setup():
     if 'username' not in session:
