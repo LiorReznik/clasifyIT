@@ -37,6 +37,9 @@
                         </p>
                     </div>
                 </div>
+                <a id="pdf-download"  target="_blank">
+                        <button  type="button" class="btn btn-default" id="download-button">Download Prediction</button>
+                    </a>
             </div>
 
         </div>
@@ -47,6 +50,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         let base64Image;
+        let predict;
         $("#image-selector").change(function () {
             let reader = new FileReader();
             var file = document.querySelector('input[type=file]').files[0]; //sames as here
@@ -58,7 +62,7 @@
                 preview.src = reader.result
                 $('#selectd-image').attr("src", dataURL);
                 base64Image = dataURL.replace("data:image/jpeg;base64,", "");
-                console.log(base64Image);
+             
             }
             if (file) {
                 reader.readAsDataURL(file); //reads the data as a URL
@@ -72,14 +76,35 @@
             let message = {
                 image: base64Image
             }
-            console.log(message);
             $.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function (response) {
-                $("#cancer_type-predction").text(response.prediction.result);
+                predict=response.prediction.result
+                $("#cancer_type-predction").text(predict);
                 var send_result = Response;
                 var preview1 = document.getElementById("img1") //selects the query named img
+                var downBtn=document.getElementById("pdf-download")
+                downBtn.style.display="block"
                 preview1.src = "https://media.giphy.com/media/5q3NyUvgt1w9unrLJ9/source.gif"
            
                 });
+        });
+        $("#download-button").click(function () {
+            let prData ={
+                prediction:predict
+            }
+            $.ajax({
+            type: 'POST',
+            url: '/download-pdf',
+            contentType: 'pdf',
+            data:JSON.stringify(prData)
+            ,
+            success: function(data) {
+                var blob=new Blob([data]);
+                var link=document.createElement('a');
+                link.href=window.URL.createObjectURL(blob);
+                link.download="prediction.pdf";
+                link.click();
+          },
+        })
         });
     </script>
     <style>
@@ -125,6 +150,13 @@
             text-align: center;
             text-decoration: none;
             display: inline-block;
+            font-size: 16px;
+        }
+        #pdf-download {
+            padding: 10px 22px;
+            text-align: center;
+            text-decoration: none;
+            display: none;
             font-size: 16px;
         }
 
