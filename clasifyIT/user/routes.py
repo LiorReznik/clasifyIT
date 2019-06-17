@@ -15,13 +15,16 @@ from ..encrypt import des_ofb,hash
 
 users = Blueprint('users', __name__)
 
-def check_for_email(email):
+
+def check_email(email):
     users=User.query.all()
-    for user in users:
-        temp=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
-        if temp==email:
-            return True
-    return False
+    flag=False
+    for u in users:
+        temp=des_ofb.ofb_decrypt(u.email,u.password_hash[:8],u.password_hash[24:32])
+        if email in temp:
+            flag=True
+    return flag        
+
 
 @users.route('/decrypted', methods=['GET'])
 def decrypt_data():
@@ -47,11 +50,11 @@ def singup():
         validate that the username or email does not in the database 
         """""
         nonlocal msg
-        email = User.query.filter_by(email=form.email.data).first()
+        email_ch=check_email(form.email.data)
         user = User.query.filter_by(username=form.username.data).first()
         if user:
             msg += 'Username already exists.\n'
-        if email:
+        if email_ch:
             msg += 'Email already exists.\n'
 
     if current_user.is_authenticated:
@@ -112,8 +115,8 @@ def editName():
     if current_user.is_authenticated:
         form = ChangeName()
         if form.validate_on_submit():
-            current_user.firstName=form.firstName.data
-            current_user.lastName=form.lastName.data
+            current_user.firstName=des_ofb.ofb_encrypt(form.firstName.data,current_user.password_hash[:8],current_user.password_hash[24:32])
+            current_user.lastName=des_ofb.ofb_encrypt(form.lastName.data,current_user.password_hash[:8],current_user.password_hash[24:32])
             db.session.commit()
             return redirect(url_for('users.profile'))
         return render_template('edit-profile.html', form=form)
@@ -130,8 +133,9 @@ def editEmail():
             validate that the username or email does not in the database 
             """""
             nonlocal msg
-            email = check_for_email(form.email.data)
-            if email:
+           
+            email_ch = check_email(form.email.data)
+            if email_ch:
                 msg += 'Email already exists.\n'
 
         form = ChangeEmail()
@@ -141,8 +145,7 @@ def editEmail():
             if len(msg) > 0:
                 flash(msg)
                 return redirect(url_for('users.editEmail'))
-
-            current_user.email=form.email.data
+            current_user.email=des_ofb.ofb_encrypt(form.email.data,current_user.password_hash[:8],current_user.password_hash[24:32])
             db.session.commit()
             return redirect(url_for('users.profile'))
         return render_template('edit-profile.html', form=form)
@@ -218,7 +221,13 @@ def two_factor_token():
         delsession()
 
     def password_change():
+        user.email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        user.firstName=des_ofb.ofb_decrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
+        user.lastName=des_ofb.ofb_decrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
         user.password = session['type'].decode()
+        user.email=des_ofb.ofb_encrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        user.firstName=des_ofb.ofb_encrypt(user.firstName,user.password_hash[:8],user.password_hash[24:32])
+        user.lastName=des_ofb.ofb_encrypt(user.lastName,user.password_hash[:8],user.password_hash[24:32])
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
         delsession()
@@ -247,7 +256,7 @@ def logout():
     logout_user()
     return redirect(url_for('home.index'))
 
-def send_reset_email(user):
+def send_reset_email(user,email):
     token = user.get_reset_token()
     link = url_for('users.reset_token', token=token, _external=True)
     body = 'To reset your password, visit the following link: {} If you did not make this request then simply ignore this email and no changes will be made.'.format(
@@ -255,15 +264,15 @@ def send_reset_email(user):
 
     msg = MIMEText(body, 'html')
     mail = sender.SendMail()
-    mail.prepare_base_email(user.email, 'Password Reset Request', msg)
+    mail.prepare_base_email(email, 'Password Reset Request', msg)
 
 @users.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        user.email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
-        send_reset_email(user)
+        email=des_ofb.ofb_decrypt(user.email,user.password_hash[:8],user.password_hash[24:32])
+        send_reset_email(user,email)
         flash('An email has been sent with instructions to reset your password.', 'info')
         return redirect(url_for('users.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
