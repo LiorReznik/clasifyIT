@@ -11,18 +11,12 @@ from ..email import sender
 from email.mime.text import MIMEText
 from ..encrypt import des_ofb,hash
 
-
-
 home = Blueprint('home', __name__)
-
 model = load_model(os.path.join(os.getcwd(), "clasifyIT/FINAL.h5"))
-
 model._make_predict_function()
-
 
 @home.route('/')
 def index():
-    
     return render_template('index.html')
 
 
@@ -37,32 +31,38 @@ def contact():
 
 @home.route("/download-pdf",methods=["POST"])
 def createPdf():
+    def randomString():
+        import string, secrets
+        nonlocal  password
+        """Generate a random string of fixed length """
+        password_characters = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(password_characters) for _ in range(10))
+
     from fpdf import FPDF
     message = request.get_json(force=True)
-    print(message)
     pdf = FPDF()
-    # compression is not yet supported in py3k version
     pdf.compress = True
     pdf.add_page()
-    # Unicode is not yet supported in the py3k version; use windows-1252 standard font
-    pdf.set_font('Arial', '', 14)  
+    pdf.set_font('Arial', '', 14)
     pdf.ln(10)
-    pdf.write(5, message["prediction"])
+    pdf.write(25, message['prediction'])
     print(pdf.output('py3k.pdf', 'F'))
     pdf.close()
     from PyPDF2 import PdfFileReader, PdfFileWriter
     with open("py3k.pdf", "rb") as in_file:
+        password = 0
         input_pdf = PdfFileReader(in_file)
         output_pdf = PdfFileWriter()
         output_pdf.appendPagesFromReader(input_pdf)
-        email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])  
-        password=des_ofb.ofb_encrypt(current_user.username,current_user.password_hash[:8],current_user.password_hash[24:32])
+        email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])
+        randomString()
         output_pdf.encrypt(password)
         out_file=open('encrypted_output.pdf', 'wb')
         out_file.seek(0)
         output_pdf.write(out_file)
         out_file.close()
-        sender.SendMail().preapare_attatched_mail(email,"The password","Open the file to see the password for pdf",password)
+        sender.SendMail().preapare_attatched_mail(email,"The password","Open the file to see the password for pdf",
+                                                  password)
         return send_file("../encrypted_output.pdf",mimetype='application/pdf',as_attachment=True)
 
 @home.route("/predict", methods=["POST"])
@@ -91,18 +91,14 @@ def predict():
             5 : "Vascular_lesions",
             6 : "Dermatofibroma"
         }
-        
+        prediction = cancer_type[prediction]
+
         email=des_ofb.ofb_decrypt(current_user.email,current_user.password_hash[:8],current_user.password_hash[24:32])  
-        
-        sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",cancer_type[prediction])
-        response = {
-            'prediction': {
-                'result' : cancer_type[prediction]
-            }
-        }
+        sender.SendMail().preapare_attatched_mail(email,"The Result","Open the file to see the result",prediction)
+
 
         # sending the result to the front
-        response = {'prediction': {'result' : cancer_type[prediction]}}
+        response = {'prediction': {'result' : prediction}}
         return jsonify(response)
     else:
         return redirect(url_for('user.login')) #if not logged in redirecting to login page

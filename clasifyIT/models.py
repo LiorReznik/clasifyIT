@@ -1,13 +1,9 @@
 from flask_login import UserMixin
-import base64
 import onetimepass
-import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from .encrypt import hash, HMAC
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-import base64
-from clasifyIT import config
 from flask import session
 from secrets import token_bytes
 
@@ -21,29 +17,42 @@ def load_user(user_id):
 
 class User(UserMixin, db.Model):
     """User model."""
+    #  lines 21-31 is the db table config
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True)
-    firstName=db.Column(db.String(20))
-    lastName=db.Column(db.String(20))
+    firstName = db.Column(db.String(20))
+    lastName = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
     second_factor_c = db.Column(db.String(16))
     email = db.Column(db.String(64), unique=True, index=True)
     hasher = hash.hasher()
     salt = db.Column(db.String(8), unique=True)
-    admin=db.Column(db.Boolean(),default=False)
+    admin = db.Column(db.Boolean(),default=False)
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
 
     @property
-    def password(self):pass
+    def password(self):pass # here for the setter
 
     @password.setter
     def password(self, password):
+        """
+        setter for the password
+        :param password:
+        :return:
+        """
+        # storing hash of password and salt
         self.password_hash= self.hasher['hash'](password+self.salt)
 
     def verify_password(self, password):
+        """
+        verifing that the entered password  is actually users password
+        :param password:
+        :return:
+        """
+        # sending the hashed value that stored in the db and the entered password+ users salt to the hash checker
         return self.hasher['check'](self.password_hash, password+self.salt)
 
     def get_otp_uri(self):
@@ -66,11 +75,12 @@ class User(UserMixin, db.Model):
         makeing hmac to send to the user
         :return:
         """
-        return HMAC.hmac(self.salt, str(self.id))#sending the salt and id of user to ths hmac maker
+        # sending the salt and id of user to ths hmac maker
+        return HMAC.hmac(self.salt, str(self.id))
 
     def verify_code(self, code):
-        
-        return HMAC.check_authentication(self.salt, str(self.id), code) #veifing the auth code for  verification
+        # veifing the auth code for  verification
+        return HMAC.check_authentication(self.salt, str(self.id), code)
 
 
     def get_reset_token(self, expires_sec=1800):

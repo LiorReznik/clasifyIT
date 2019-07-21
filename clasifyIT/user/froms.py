@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, EqualTo,Regexp,Email
+from wtforms.validators import DataRequired, Length, EqualTo,Regexp
 from clasifyIT.models import User
 from wtforms.validators import ValidationError
 
@@ -14,27 +14,21 @@ class SingupForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(),
                                                      Regexp(
                                                     "^(?=.{8,})(?=.*[1-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[(!@#$%^&*()_+|~\- =\`{}[\]:”;'<>?,.\/, )])(?!.*(.)\1{2,}).+$",
-                                                         0, "Password must contain at least 8 chars, at least one digit, at least one lowercase, at least one uppercase, at leatet one speacial char and without sequencial repeats"
-
-
-
-
-
-
-
-                                                     )])
+                                                         0, "Password must contain at least 8 chars"
+                                                            ", at least one digit, at least one lowercase, at least one uppercase, at leatet one speacial char and without sequencial repeats"
+                                                     ), Length(max=16)])
     password2 = PasswordField('Password2',
                               validators=[DataRequired(), EqualTo('password')])
-    email = StringField('Email', validators=[DataRequired()])
-    firstName=StringField('First Name',validators=[DataRequired()])
-    lastName=StringField('Last Name',validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Length(max=64)])
+    firstName=StringField('First Name',validators=[DataRequired(), Length(min=4, max=20)])
+    lastName=StringField('Last Name',validators=[DataRequired(), Length(min=4, max=20)])
     submit = SubmitField('Sumbit')
 
 
 class LoginForm(FlaskForm):
     """Login form."""
     username = StringField('Username', validators=[DataRequired(), Length(min=6, max=64)])
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=16)])
     submit = SubmitField('Login')
 
 
@@ -71,17 +65,18 @@ class ChangeUsername(FlaskForm):
     username = StringField('username', validators=[DataRequired()])
     confirm_username = StringField('Confirm Username',
                                         validators=[DataRequired(), EqualTo('username')])
-                                            
 
     submit = SubmitField('Change user')
+
 
 class ChangeName(FlaskForm):
     firstName=StringField('First Name',validators=[DataRequired()])
     lastName=StringField('Last Name',validators=[DataRequired()])
     submit = SubmitField('Change name')
 
+
 class ChangeEmail(FlaskForm):
     email = StringField('Email',
-                        validators=[DataRequired()])    
-                                            
+                        validators=[DataRequired()])
+
     submit = SubmitField('Change email')

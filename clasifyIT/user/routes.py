@@ -114,6 +114,7 @@ def editProfile():
     else:
         return redirect(url_for('users.login'))
 
+
 @users.route('/edit_name', methods=['GET', 'POST'])
 def editName():
     if current_user.is_authenticated:
@@ -126,6 +127,7 @@ def editName():
         return render_template('edit-profile.html', form=form)
     else:
         return redirect(url_for('users.login'))
+
 
 @users.route('/edit_email', methods=['GET', 'POST'])
 def editEmail():
@@ -156,6 +158,8 @@ def editEmail():
         return render_template('edit-profile.html', form=form)
     else:
         return redirect(url_for('users.login'))
+
+
 @users.route('/twofactor')
 def two_factor_setup():
     if 'username' not in session:
