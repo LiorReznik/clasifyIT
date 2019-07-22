@@ -1,4 +1,4 @@
-# clasifyIT
+# classifyIT
 
 to start the project make the following steps:
 
