@@ -17,7 +17,7 @@ gast==0.2.2
 grpcio==1.21.1
 h5py==2.9.0
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.11.3
 FPDF==1.7.2
 PyPDF2==1.26.0
 Keras==2.2.4
