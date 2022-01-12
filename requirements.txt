@@ -30,7 +30,7 @@ mock==3.0.5
 numpy==1.16.3
 onetimepass==1.0.1
 Pillow==6.2.0
-pipenv==2018.11.26
+pipenv==2022.1.8
 protobuf==3.7.1
 PyQRCode==1.2.1
 python-dateutil==2.8.0
