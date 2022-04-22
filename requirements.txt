@@ -19,7 +19,7 @@ h5py==2.9.0
 itsdangerous==0.24
 Jinja2==2.10
 FPDF==1.7.2
-PyPDF2==1.26.0
+PyPDF2==1.27.5
 Keras==2.2.4
 Keras-Applications==1.0.7
 Keras-Preprocessing==1.0.9
